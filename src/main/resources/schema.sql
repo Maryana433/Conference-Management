@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS conference_user;
 
 CREATE TABLE conference_user (
     id IDENTITY PRIMARY KEY,
-    login varchar(128),
+    login varchar(128) unique ,
     email varchar (128)
 );
 

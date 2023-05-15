@@ -16,9 +16,9 @@ public class LectureRepository {
 
     private final List<Lecture> lectures;
 
-    private int lectureNumber;
+    private final int lectureNumber;
 
-    private int thematicPathNumber;
+    private final int thematicPathNumber;
 
     public LectureRepository(@Value("${conference.lecture.number}") int lectureNumber, @Value("${conference.lecture.number}") int thematicPathNumber ){
 

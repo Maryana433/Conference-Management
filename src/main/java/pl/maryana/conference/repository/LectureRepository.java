@@ -1,24 +1,35 @@
 package pl.maryana.conference.repository;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import pl.maryana.conference.model.Lecture;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Repository
 public class LectureRepository {
 
     private final List<Lecture> lectures;
 
-    public LectureRepository(){
+    private int lectureNumber;
+
+    private int thematicPathNumber;
+
+    public LectureRepository(@Value("${conference.lecture.number}") int lectureNumber, @Value("${conference.lecture.number}") int thematicPathNumber ){
+
+        this.thematicPathNumber = thematicPathNumber;
+        this.lectureNumber = lectureNumber;
+
         this.lectures = new ArrayList<>();
-        Stream.of(generateAllLecturesByOrderAndNumberOfPaths(1,3),
-                generateAllLecturesByOrderAndNumberOfPaths(2,3),
-                generateAllLecturesByOrderAndNumberOfPaths(3,3)).forEach(lectures::addAll);
+
+        for(int i = 1; i<= lectureNumber; i++){
+            this.lectures.addAll(generateAllLecturesByOrderAndNumberOfPaths(i, thematicPathNumber));
+        }
     }
 
     public List<Lecture> findAll(){
@@ -30,11 +41,25 @@ public class LectureRepository {
     }
 
     private List<Lecture> generateAllLecturesByOrderAndNumberOfPaths(int lectureOrder, int numberOfPaths){
+
+        int yearOfConference = 2023;
+        int monthOfConference = 6;
+        int dayOfConference = 1;
+
+        LocalDate dateOfConference = LocalDate.of(yearOfConference,monthOfConference, dayOfConference);
+        LocalTime startTimeOfConference = LocalTime.of(10, 0);
+        int durationOfEachLecture = 105;
+        int breakBetweenLectures = 15;
+
         List<Lecture> lectureList = new ArrayList<>();
         for(int i=1; i <= numberOfPaths; i++){
-            lectureList.add(new Lecture((lectureOrder-1)* 3L + i, lectureOrder, String.format("Thematic Path %d", i),
-                    String.format("Description of the lecture %d of thematic path %d",lectureOrder, i)));
+            LocalDateTime startTime = LocalDateTime.of(dateOfConference, startTimeOfConference.plusMinutes((long) (lectureOrder - 1) * (durationOfEachLecture + breakBetweenLectures)));
+            long lectureId = (lectureOrder-1)* 3L + i;
+
+            lectureList.add(new Lecture(lectureId, lectureOrder, String.format("Thematic Path %d", i),
+                    String.format("Description of the lecture %d of thematic path %d",lectureOrder, i), startTime, durationOfEachLecture));
         }
+
         return lectureList;
     }
 

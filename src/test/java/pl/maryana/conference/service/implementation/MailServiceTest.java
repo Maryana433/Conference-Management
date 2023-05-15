@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.TestPropertySource;
 import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.repository.LectureRepository;
 import pl.maryana.conference.service.MailService;
@@ -17,6 +18,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = {MailServiceImpl.class, LectureRepository.class})
+@TestPropertySource(locations="classpath:application.properties")
 public class MailServiceTest {
 
     @Autowired
@@ -27,6 +29,7 @@ public class MailServiceTest {
 
     @Value("${email.message.file-name}")
     private String fileName;
+
 
     @Test
     public void shouldAppendIntoFileInformationAboutMessages() throws IOException {

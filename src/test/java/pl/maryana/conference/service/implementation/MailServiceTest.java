@@ -18,7 +18,6 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(classes = {MailServiceImpl.class, LectureRepository.class})
-@TestPropertySource(locations="classpath:application.properties")
 public class MailServiceTest {
 
     @Autowired

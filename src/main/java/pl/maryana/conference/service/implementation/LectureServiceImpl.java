@@ -2,6 +2,7 @@ package pl.maryana.conference.service.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import pl.maryana.conference.exception.LectureNotFound;
 import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.repository.LectureRepository;
 import pl.maryana.conference.service.LectureService;

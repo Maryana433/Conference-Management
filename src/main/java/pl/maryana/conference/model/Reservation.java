@@ -25,4 +25,7 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @Transient
+    private Lecture lecture;
 }

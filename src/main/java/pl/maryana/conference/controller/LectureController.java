@@ -29,7 +29,7 @@ public class LectureController {
     }
 
     @GetMapping
-    @Operation(summary="List of lectures")
+    @Operation(summary="List of lectures", description = "Użytkownik może obejrzeć plan konferencji.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of lectures", content = @Content(array =
                                                 @ArraySchema(schema = @Schema(implementation = LectureDto.class))))

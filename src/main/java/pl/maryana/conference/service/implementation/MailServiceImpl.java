@@ -1,15 +1,21 @@
 package pl.maryana.conference.service.implementation;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.service.MailService;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 public class MailServiceImpl implements MailService {
 
     @Value("${email.message.file-name}")
@@ -23,6 +29,8 @@ public class MailServiceImpl implements MailService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        log.info("Email was send to " + sendTo);
 
     }
 

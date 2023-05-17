@@ -205,6 +205,31 @@ public class ReservationServiceTest {
 
     }
 
+    @Test
+    void shouldThrowExceptionWhenReservationNotFoundAndUserTryToCancelIt(){
+        long reservationId = 1L;
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
+
+        assertThrows(ReservationNotFound.class, () -> reservationService.cancelReservation(reservationId));
+    }
+
+
+    @Test
+    void shouldCancelReservation(){
+        //given
+        long reservationId = 1L;
+        Reservation reservation = new Reservation();
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+        //when
+        reservationService.cancelReservation(reservationId);
+
+
+        //then
+        verify(reservationRepository).delete(reservation);
+
+    }
+
 
 
 }

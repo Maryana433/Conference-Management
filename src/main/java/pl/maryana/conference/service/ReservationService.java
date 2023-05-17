@@ -8,6 +8,6 @@ public interface ReservationService {
 
     List<Reservation> findAllByLogin(String login);
     Reservation reserve(String login, String email, long lectureId);
-    void cancelReservation(String login, long lectureId);
+    void cancelReservation(long reservationId);
     Reservation findById(long reservationId);
 }

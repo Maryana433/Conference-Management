@@ -77,6 +77,21 @@ public class ReservationController {
                 .body(new ReservationDto(reservation));
     }
 
+    @DeleteMapping("/{id}")
+    @Operation(summary="Cancel (delete) reservation", description = "Użytkownik może anulować rezerwację. ")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created reservation info with url to new resource in Location header", content = @Content(array =
+            @ArraySchema(schema = @Schema(implementation = ReservationDto.class)))),
+
+            @ApiResponse(responseCode = "404", description = "Reservation with id not found",
+                    content = @Content(schema =
+                    @Schema(implementation = ApiExceptionDto.class)))
+    })
+    public ResponseEntity cancelReservation(@PathVariable long id){
+        reservationService.cancelReservation(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
 
 }

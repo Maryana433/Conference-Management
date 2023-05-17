@@ -99,8 +99,10 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public void cancelReservation(String login, long lectureId) {
-
+    public void cancelReservation(long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(() ->
+                new ReservationNotFound("Reservation with id [" + reservationId + "] not found"));
+        reservationRepository.delete(reservation);
     }
 
     @Override

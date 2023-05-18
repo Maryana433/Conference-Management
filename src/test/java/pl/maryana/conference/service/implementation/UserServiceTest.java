@@ -7,9 +7,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.maryana.conference.exception.LectureNotFound;
 import pl.maryana.conference.exception.LoginIsAlreadyTaken;
+import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.model.User;
 import pl.maryana.conference.repository.UserRepository;
+import pl.maryana.conference.service.LectureService;
 import pl.maryana.conference.service.UserService;
 
 import java.util.Optional;
@@ -24,11 +27,13 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private LectureService lectureService;
     private UserService userService;
 
     @BeforeEach
     void init(){
-        userService = new UserServiceImpl(userRepository);
+        userService = new UserServiceImpl(userRepository, lectureService);
     }
 
 
@@ -91,6 +96,38 @@ public class UserServiceTest {
         //then
         assertEquals(newEmail, user.getEmail());
         verify(userRepository).save(user);
+    }
+
+
+    @Test
+    void shouldReturnAllRegisteredUser(){
+        long lectureId = 0L;
+
+        userService.findAllRegisteredUsers(lectureId);
+
+        verify(userRepository).findByMakeReservation();
+        verifyNoMoreInteractions(userRepository);
+    }
+
+
+    @Test
+    void shouldReturnRegisteredUsersByLecture(){
+        long lectureId = 1L;
+        when(lectureService.findById(lectureId)).thenReturn(Optional.of(new Lecture()));
+
+        userService.findAllRegisteredUsers(lectureId);
+
+        verify(userRepository).findByMakeReservation(lectureId);
+        verifyNoMoreInteractions(userRepository);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLectureNotFound(){
+        long lectureId = 1L;
+        when(lectureService.findById(lectureId)).thenReturn(Optional.empty());
+
+        assertThrows(LectureNotFound.class, () -> userService.findAllRegisteredUsers(lectureId));
+
     }
 
 }

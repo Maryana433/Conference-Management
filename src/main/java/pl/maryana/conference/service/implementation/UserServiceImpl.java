@@ -4,13 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.maryana.conference.exception.LectureNotFound;
 import pl.maryana.conference.exception.LoginIsAlreadyTaken;
 import pl.maryana.conference.exception.UserNotFound;
+import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.model.Role;
 import pl.maryana.conference.model.User;
 import pl.maryana.conference.repository.UserRepository;
+import pl.maryana.conference.service.LectureService;
 import pl.maryana.conference.service.UserService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -18,10 +22,12 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final LectureService lectureService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, LectureService lectureService) {
         this.userRepository = userRepository;
+        this.lectureService = lectureService;
     }
 
 
@@ -42,7 +48,7 @@ public class UserServiceImpl implements UserService {
         user.setEmail(email);
         user.setPassword(password);
 
-        user.setRole("ROLE_" + Role.USER);
+        user.setRole(Role.ROLE_USER.name());
 
         User saved = userRepository.save(user);
 
@@ -56,6 +62,17 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByLogin(login).orElseThrow(() -> new UserNotFound("User [" + login +"] not found"));
         user.setEmail(newEmail);
         return userRepository.save(user);
+    }
+
+    @Override
+    public List<User> findAllRegisteredUsers(long lecture_id) {
+         if(lecture_id == 0){
+             return userRepository.findByMakeReservation();
+         }
+
+         lectureService.findById(lecture_id).orElseThrow(() -> new LectureNotFound("Lecture with id [" + lecture_id + "] not found"));
+
+         return userRepository.findByMakeReservation(lecture_id);
     }
 
 }

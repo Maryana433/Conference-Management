@@ -1,7 +1,6 @@
 package pl.maryana.conference.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;

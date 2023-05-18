@@ -19,3 +19,5 @@ CREATE TABLE reservation (
 
 ALTER TABLE reservation
     ADD FOREIGN KEY (user_id) REFERENCES conference_user(id);
+
+ALTER TABLE reservation ADD UNIQUE (lecture_id, user_id);

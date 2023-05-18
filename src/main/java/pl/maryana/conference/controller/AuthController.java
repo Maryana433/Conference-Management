@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import pl.maryana.conference.dto.*;
+import pl.maryana.conference.dto.request.SigninDto;
+import pl.maryana.conference.dto.request.SignupDto;
+import pl.maryana.conference.dto.response.ApiExceptionDto;
+import pl.maryana.conference.dto.response.JwtDto;
+import pl.maryana.conference.dto.response.UserInfoDto;
 import pl.maryana.conference.model.User;
 import pl.maryana.conference.security.JwtUtils;
 import pl.maryana.conference.service.UserService;
@@ -50,7 +54,7 @@ public class AuthController {
     public ResponseEntity<UserInfoDto> registerUser(@RequestBody @Valid SignupDto userSignupInfo) {
 
         User savedUser = userService.
-                register(passwordEncoder.encode(userSignupInfo.getPassword()), userSignupInfo.getLogin(), userSignupInfo.getPassword());
+                register(passwordEncoder.encode(userSignupInfo.getPassword()), userSignupInfo.getLogin(), userSignupInfo.getEmail());
 
         return new ResponseEntity<>(new UserInfoDto(savedUser), HttpStatus.CREATED);
     }

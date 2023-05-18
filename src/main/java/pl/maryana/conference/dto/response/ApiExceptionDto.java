@@ -1,4 +1,4 @@
-package pl.maryana.conference.dto;
+package pl.maryana.conference.dto.response;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;

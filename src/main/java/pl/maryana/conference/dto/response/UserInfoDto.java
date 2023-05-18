@@ -1,4 +1,4 @@
-package pl.maryana.conference.dto;
+package pl.maryana.conference.dto.response;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

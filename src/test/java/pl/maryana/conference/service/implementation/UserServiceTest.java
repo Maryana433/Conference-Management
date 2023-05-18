@@ -4,14 +4,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import pl.maryana.conference.exception.LoginIsAlreadyTaken;
 import pl.maryana.conference.model.User;
 import pl.maryana.conference.repository.UserRepository;
 import pl.maryana.conference.service.UserService;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @DisplayName("UserService Tests")
 @ExtendWith(MockitoExtension.class)
@@ -41,19 +46,51 @@ public class UserServiceTest {
         verifyNoMoreInteractions(userRepository);
     }
 
+    @Test
+    void shouldThrowExceptionWhenUserWithLoginExists(){
+        String login = "login";
+        when(userRepository.findByLogin(login)).thenReturn(Optional.of(new User()));
+
+        assertThrows(LoginIsAlreadyTaken.class, () -> userService.register("password", login, "email"));
+
+    }
 
     @Test
-    void shouldSaveUser(){
+    void shouldRegisterUser(){
         //given
-        User userToSave = new User();
+        String login = "login";
+        String password = "password";
+        String email = "email";
+        when(userRepository.findByLogin(login)).thenReturn(Optional.empty());
+
 
         //when
-        userService.save(userToSave);
+        userService.register(password,login, email);
 
         //then
-        verify(userRepository).save(userToSave);
-        verifyNoMoreInteractions(userRepository);
+        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userArgumentCaptor.capture());
+        User captured = userArgumentCaptor.getValue();
 
+        assertEquals(login, captured.getLogin());
+        assertEquals(password, captured.getPassword());
+        assertEquals(email, captured.getEmail());
+    }
+
+    @Test
+    void shouldUpdateEmail(){
+        //given
+        String newEmail = "newEmail";
+        String login = "login";
+        User user = new User();
+        when(userRepository.findByLogin(login)).thenReturn(Optional.of(user));
+
+        //when
+        userService.updateEmail(login, newEmail);
+
+        //then
+        assertEquals(newEmail, user.getEmail());
+        verify(userRepository).save(user);
     }
 
 }

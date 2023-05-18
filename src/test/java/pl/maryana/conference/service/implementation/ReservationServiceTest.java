@@ -4,13 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import pl.maryana.conference.exception.LimitOfReservations;
-import pl.maryana.conference.exception.LoginIsAlreadyTaken;
-import pl.maryana.conference.exception.ReservationNotFound;
-import pl.maryana.conference.exception.UserNotFound;
+import pl.maryana.conference.exception.*;
 import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.model.Reservation;
 import pl.maryana.conference.model.User;
@@ -20,6 +17,7 @@ import pl.maryana.conference.service.MailService;
 import pl.maryana.conference.service.ReservationService;
 import pl.maryana.conference.service.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,54 +37,22 @@ public class ReservationServiceTest {
     private LectureService lectureService;
     @Mock
     private MailService mailService;
+    @Mock
+    private TimeService timeService;
 
     private ReservationService reservationService;
 
-    private static long reservationLimit = 5L;
+    private final static long reservationLimit = 5L;
 
 
     @BeforeEach
     void init(){
-        reservationService = new ReservationServiceImpl(reservationRepository,
+        reservationService = new ReservationServiceImpl(timeService, reservationRepository,
                 userService, lectureService, mailService);
     }
 
     @Test
-    void shouldThrowExceptionWhenReservationNotExists(){
-
-        //given
-        long reservationId = 1L;
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
-
-        //when
-        assertThrows(ReservationNotFound.class, () -> reservationService.findById(reservationId) );
-    }
-
-    @Test
-    void shouldFindReservationById(){
-        //given
-        long reservationId = 1L;
-        long lectureId = 1L;
-        Lecture lecture = new Lecture();
-        lecture.setId(lectureId);
-        Reservation reservation = new Reservation();
-        reservation.setId(reservationId);
-        reservation.setLecture(lecture);
-        reservation.setLectureId(lectureId);
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
-        when(lectureService.findById(lectureId)).thenReturn(Optional.of(lecture));
-
-        //then
-        Reservation reservationFromService = reservationService.findById(reservationId);
-
-        //when
-        verify(reservationRepository).findById(reservationId);
-        verify(lectureService).findById(lectureId);
-        assertEquals(reservation, reservationFromService);
-    }
-
-    @Test
-    void shouldThrowExceptionWhenUserWithLoginNotExists(){
+    void shouldThrowExceptionWhenUserWithLoginNotExistsWhenTryToFindAllReservations(){
         String login = "login";
         when(userService.findByLogin(login)).thenReturn(Optional.empty());
 
@@ -110,13 +76,46 @@ public class ReservationServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenLimitOfLectureReached(){
+    void shouldThrowExceptionWhenLectureHasAlreadyStartedAndUserTryToMakeReservation(){
         String login = "login";
         String email = "email";
         long lectureId = 1L;
-        when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit);
 
-        assertThrows(LimitOfReservations.class, () -> reservationService.reserve(login, email, lectureId));
+        Lecture lecture = new Lecture();
+        lecture.setStartDateTime(LocalDateTime.now());
+
+        when(lectureService.findById(lectureId)).thenReturn(Optional.of(lecture));
+        when(timeService.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(true);
+
+        assertThrows(LectureReservationExpiredException.class, () -> reservationService.reserve(login, email, lectureId));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLectureNotFound(){
+        String login = "login";
+        String email = "email";
+        long lectureId = 1L;
+
+        when(lectureService.findById(lectureId)).thenReturn(Optional.empty());
+        assertThrows(LectureNotFound.class, () -> reservationService.reserve(login, email, lectureId));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenLimitOfLectureReached(){
+
+            String login = "login";
+            String email = "email";
+            long lectureId = 1L;
+
+            Lecture lecture = new Lecture();
+            lecture.setStartDateTime(LocalDateTime.now());
+
+            when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit);
+            when(lectureService.findById(lectureId)).thenReturn(Optional.of(lecture));
+            when(timeService.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(false);
+
+            assertThrows(LimitOfReservations.class, () -> reservationService.reserve(login, email, lectureId));
+
     }
 
     @Test
@@ -130,12 +129,16 @@ public class ReservationServiceTest {
         user.setEmail(email);
         user.setLogin(login);
 
+        Lecture lecture = new Lecture();
+        lecture.setStartDateTime(LocalDateTime.now());
+
         when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit - 1);
-        when(userService.findByLogin(login)).thenReturn(Optional.of(user));
-        when(reservationRepository.findByUserAndLectureId(user, lectureId)).thenReturn(Optional.of(new Reservation()));
+        when(reservationRepository.findByLectureIdAndUserLogin(lectureId, login)).thenReturn(Optional.of(new Reservation()));
+        when(lectureService.findById(lectureId)).thenReturn(Optional.of(lecture));
+        when(timeService.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(false);
 
         //when
-        assertThrows(LoginIsAlreadyTaken.class, () -> reservationService.reserve(login, email, lectureId));
+        assertThrows(DuplicateReservationException.class, () -> reservationService.reserve(login, email, lectureId));
     }
 
     @Test
@@ -153,8 +156,8 @@ public class ReservationServiceTest {
         lecture.setId(lectureId);
 
         when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit - 1);
+        when(reservationRepository.findByLectureIdAndUserLogin(lectureId, login)).thenReturn(Optional.empty());
         when(userService.findByLogin(login)).thenReturn(Optional.of(user));
-        when(reservationRepository.findByUserAndLectureId(user, lectureId)).thenReturn(Optional.empty());
         when(lectureService.findById(lectureId)).thenReturn(Optional.of(lecture));
 
 
@@ -170,47 +173,25 @@ public class ReservationServiceTest {
         assertEquals(lecture, reservationFromService.getLecture());
     }
 
+
     @Test
-    void shouldSaveUserAndReservationWhenUserNotExistsAndSendEmail(){
-        //given
+    void shouldThrowExceptionWhenUserTryToCancelNotHisReservation(){
+        long reservationId = 1L;
         String login = "login";
-        String email = "email";
-        long lectureId = 1L;
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(new Reservation()));
+        when(reservationRepository.findByIdAndUserLogin(reservationId, login)).thenReturn(Optional.empty());
 
-        User user = new User();
-        user.setEmail(email);
-        user.setLogin(login);
-
-        Lecture lecture = new Lecture();
-        lecture.setId(lectureId);
-
-        when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit - 1);
-        when(userService.findByLogin(login)).thenReturn(Optional.empty());
-        when(lectureService.findById(lectureId)).thenReturn(Optional.of(lecture));
-
-        //when
-        Reservation reservationFromService = reservationService.reserve(login, email, lectureId);
-
-        verify(mailService).sendEmail(email, login, lecture);
-        ArgumentCaptor<User> userArgumentCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userService).save(userArgumentCaptor.capture());
-        User capturedUser = userArgumentCaptor.getValue();
-
-        assertEquals(email, capturedUser.getEmail());
-        assertEquals(login, capturedUser.getLogin());
-        assertEquals(reservationFromService, capturedUser.getReservations().get(0));
-
-        assertEquals(lectureId, reservationFromService.getLectureId());
-        assertEquals(lecture, reservationFromService.getLecture());
-
+        assertThrows(UnauthorizedCancellationException.class, () -> reservationService.cancelReservation(reservationId, login));
     }
+
 
     @Test
     void shouldThrowExceptionWhenReservationNotFoundAndUserTryToCancelIt(){
         long reservationId = 1L;
+        String login = "login";
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
 
-        assertThrows(ReservationNotFound.class, () -> reservationService.cancelReservation(reservationId));
+        assertThrows(ReservationNotFound.class, () -> reservationService.cancelReservation(reservationId, login));
     }
 
 
@@ -218,11 +199,13 @@ public class ReservationServiceTest {
     void shouldCancelReservation(){
         //given
         long reservationId = 1L;
+        String login = "login";
         Reservation reservation = new Reservation();
+        when(reservationRepository.findByIdAndUserLogin(reservationId, login)).thenReturn(Optional.of(reservation));
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 
         //when
-        reservationService.cancelReservation(reservationId);
+        reservationService.cancelReservation(reservationId, login);
 
 
         //then

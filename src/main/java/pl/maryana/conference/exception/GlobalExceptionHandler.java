@@ -44,6 +44,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(e, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(UnauthorizedCancellationException.class)
+    public ResponseEntity<ApiExceptionDto> unauthorizeCancellation(UnauthorizedCancellationException e) {
+        log.debug("FORBIDDEN - " + e.getMessage());
+        return buildResponseEntity(e, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(DuplicateReservationException.class)
+    public ResponseEntity<ApiExceptionDto> duplicateReservation(DuplicateReservationException e) {
+        log.debug("FORBIDDEN - " + e.getMessage());
+        return buildResponseEntity(e, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(LectureReservationExpiredException.class)
+    public ResponseEntity<ApiExceptionDto> lectureReservation(LectureReservationExpiredException e) {
+        log.debug("BAD_REQUEST - " + e.getMessage());
+        return buildResponseEntity(e, HttpStatus.BAD_REQUEST);
+    }
+
 
 
     private static ResponseEntity<ApiExceptionDto> buildResponseEntity(Exception e, HttpStatus status) {

@@ -6,12 +6,8 @@ import org.springframework.stereotype.Service;
 import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.service.MailService;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 
 @Service

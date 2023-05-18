@@ -4,7 +4,9 @@ DROP TABLE IF EXISTS conference_user;
 CREATE TABLE conference_user (
     id IDENTITY PRIMARY KEY,
     login varchar(128) unique ,
-    email varchar (128)
+    email varchar (128),
+    password varchar(128),
+    role varchar(128)
 );
 
 

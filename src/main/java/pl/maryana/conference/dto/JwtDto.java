@@ -7,11 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class LoginEmailDto {
-
-    private String login;
-
-    private String email;
+public class JwtDto {
+    private String token;
 }

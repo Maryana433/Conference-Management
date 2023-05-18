@@ -11,13 +11,9 @@ import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
-@NoArgsConstructor
 public class ReservationDto {
 
-    private String email;
-    private String login;
-
-
+    private long reservationId;
     private long lectureId;
     private String thematicPath;
     private String startTime;
@@ -30,9 +26,7 @@ public class ReservationDto {
         User user = reservation.getUser();
         Lecture lecture = reservation.getLecture();
 
-        this.email = user.getEmail();
-        this.login = user.getLogin();
-
+        this.reservationId = reservation.getId();
         this.lectureId = lecture.getId();
         this.thematicPath = lecture.getThematicPath();
         this.startTime = lecture.getStartDateTime().format(DateTimeFormatter.ofPattern(dateTimePattern));

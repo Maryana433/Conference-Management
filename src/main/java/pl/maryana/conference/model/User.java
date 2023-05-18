@@ -27,6 +27,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Reservation> reservations = new ArrayList<>();
 
+    @Column(name ="password")
+    private String password;
+
+    @Column(name = "role")
+    private String role;
+
     public void addReservation(Reservation reservation) {
         this.reservations.add(reservation);
         reservation.setUser(this);

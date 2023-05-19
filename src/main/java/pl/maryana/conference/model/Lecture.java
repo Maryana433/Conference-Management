@@ -12,20 +12,18 @@ import java.time.LocalDateTime;
 public class Lecture {
 
     private long id;
-    private int order;
     private ThematicPath thematicPath;
     private String description;
 
     private LocalDateTime startDateTime;
-    private int minutDuration;
+    private LocalDateTime endDateTime;
 
-    public Lecture(long id, int order, ThematicPath thematicPath, String description, LocalDateTime startDateTime, int minutDuration ) {
+    public Lecture(long id, ThematicPath thematicPath, String description, LocalDateTime startDateTime, LocalDateTime endDateTime ) {
         this.id = id;
-        this.order = order;
         this.thematicPath = thematicPath;
         this.description = description;
         this.startDateTime = startDateTime;
-        this.minutDuration = minutDuration;
+        this.endDateTime = endDateTime;
     }
 
 
@@ -35,7 +33,7 @@ public class Lecture {
                 "thematicPath='" + thematicPath + '\'' +
                 ", description='" + description + '\'' +
                 ", startTime=" + startDateTime +
-                ", minutDuration=" + minutDuration +
+                ", minutDuration=" + endDateTime +
                 '}';
     }
 }

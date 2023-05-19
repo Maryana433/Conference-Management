@@ -13,6 +13,7 @@ import pl.maryana.conference.dto.response.LectureDto;
 import pl.maryana.conference.service.LectureThematicPathService;
 import io.swagger.v3.oas.annotations.Operation;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,7 +36,8 @@ public class LectureController {
                                                 @ArraySchema(schema = @Schema(implementation = LectureDto.class))))
     })
     public Map<String, List<LectureDto>> getAllLectures(){
-        return lectureThematicPathService.findAll().stream().map(LectureDto::new).collect(Collectors.groupingBy(LectureDto::getStartTime));
+        String dateTimePattern = "dd-MM-yyyy H:mm";
+        return lectureThematicPathService.findAll().stream().map(LectureDto::new).collect(Collectors.groupingBy(e -> e.getStartTime().format(DateTimeFormatter.ofPattern(dateTimePattern))));
     }
 
 }

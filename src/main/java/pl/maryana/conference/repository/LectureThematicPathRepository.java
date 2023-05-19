@@ -13,17 +13,10 @@ import java.util.*;
 @Repository
 public class LectureThematicPathRepository {
 
-    private List<Lecture> lectures = new ArrayList<>();
-    private Set<ThematicPath> thematicPathSet = new HashSet<>();
-
-    private final int lectureNumber;
-
-    private final int thematicPathNumber;
+    private final List<Lecture> lectures = new ArrayList<>();
+    private final Set<ThematicPath> thematicPathSet = new HashSet<>();
 
     public LectureThematicPathRepository(@Value("${conference.lecture.number}") int lectureNumber, @Value("${conference.lecture.number}") int thematicPathNumber ){
-
-        this.thematicPathNumber = thematicPathNumber;
-        this.lectureNumber = lectureNumber;
 
         for(int i = 1; i<= lectureNumber; i++){
             this.lectures.addAll(generateAllLecturesByOrderAndNumberOfPaths(i, thematicPathNumber));
@@ -55,14 +48,18 @@ public class LectureThematicPathRepository {
 
         List<Lecture> lectureList = new ArrayList<>();
         for(int i=1; i <= numberOfPaths; i++){
-            LocalDateTime startTime = LocalDateTime.of(dateOfConference, startTimeOfConference.plusMinutes((long) (lectureOrder - 1) * (durationOfEachLecture + breakBetweenLectures)));
-            long lectureId = (lectureOrder-1)* 3L + i;
+
+            LocalDateTime startTime = LocalDateTime.of(dateOfConference, startTimeOfConference
+                    .plusMinutes((long) (lectureOrder - 1) * (durationOfEachLecture + breakBetweenLectures)));
+
+            LocalDateTime endTime = startTime.plusMinutes(durationOfEachLecture);
 
             ThematicPath thematicPath = new ThematicPath(i,String.format("Thematic Path %d", i));
             thematicPathSet.add(thematicPath);
 
-            lectureList.add(new Lecture(lectureId, lectureOrder, thematicPath,
-                    String.format("Description of the lecture %d of thematic path %d",lectureOrder, i), startTime, durationOfEachLecture));
+            long lectureId = 3L *(lectureOrder - 1) + i;
+            lectureList.add(new Lecture(lectureId, thematicPath,
+                    String.format("Description of the lecture %d of thematic path %d",lectureOrder, i), startTime, endTime));
         }
 
         return lectureList;

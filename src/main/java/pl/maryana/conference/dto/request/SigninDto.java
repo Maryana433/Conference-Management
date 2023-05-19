@@ -16,6 +16,6 @@ public class SigninDto {
     @Size(min = 4, message = "Login should have at least 4 characters")
     private String login;
 
-    @Size(min = 8, message = "Login should have at least 8 characters")
+    @Size(min = 8, message = "Password should have at least 8 characters")
     private String password;
 }

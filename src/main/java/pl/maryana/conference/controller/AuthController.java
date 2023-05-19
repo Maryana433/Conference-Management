@@ -63,7 +63,7 @@ public class AuthController {
     @PostMapping("/authenticate")
     @Operation(summary="Authenticate",description = "User can authenticate by login and password")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User successfully registered",content = @Content(
+            @ApiResponse(responseCode = "200", description = "Return JWT token",content = @Content(
                     schema = @Schema(implementation = JwtDto.class)))
     })
     public ResponseEntity<JwtDto> authenticateUser(@RequestBody SigninDto userSigninInfo) {

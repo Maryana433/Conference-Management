@@ -32,8 +32,4 @@ public class User {
     @Column(name = "role")
     private String role;
 
-    public void addReservation(Reservation reservation) {
-        this.reservations.add(reservation);
-        reservation.setUser(this);
-    }
 }

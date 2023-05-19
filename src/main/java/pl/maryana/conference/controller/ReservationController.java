@@ -49,11 +49,11 @@ public class ReservationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created reservation info", content = @Content(array =
                     @ArraySchema(schema = @Schema(implementation = ReservationDto.class)))),
-            @ApiResponse(responseCode = "400", description = "User try to make reservation after lecture started", content = @Content(array =
+            @ApiResponse(responseCode = "400", description = "User try to make reservation after lecture started or user with this login has already made the reservation to this this time", content = @Content(array =
                     @ArraySchema(schema = @Schema(implementation = ApiExceptionDto.class)))),
             @ApiResponse(responseCode = "404", description = "Lecture not found", content = @Content(array =
                 @ArraySchema(schema = @Schema(implementation = ApiExceptionDto.class)))),
-            @ApiResponse(responseCode = "409", description = "Limit of reservation for this lecture was reached or User with this login has already made the reservation ",
+            @ApiResponse(responseCode = "409", description = "Limit of reservation for this lecture was reached ",
                     content = @Content(schema =
                             @Schema(implementation = ApiExceptionDto.class)))
     })

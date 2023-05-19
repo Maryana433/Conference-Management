@@ -20,6 +20,7 @@ import pl.maryana.conference.service.ReservationService;
 import pl.maryana.conference.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +40,7 @@ public class ReservationServiceTest {
     @Mock
     private MailService mailService;
     @Mock
-    private TimeService timeService;
+    private TimeServiceImpl timeServiceImpl;
 
     private ReservationService reservationService;
 
@@ -49,7 +50,7 @@ public class ReservationServiceTest {
 
     @BeforeEach
     void init(){
-        reservationService = new ReservationServiceImpl(reservationLimit,timeService, reservationRepository,
+        reservationService = new ReservationServiceImpl(reservationLimit, timeServiceImpl, reservationRepository,
                 userService, lectureThematicPathService, mailService);
     }
 
@@ -78,21 +79,6 @@ public class ReservationServiceTest {
     }
 
     @Test
-    void shouldThrowExceptionWhenLectureHasAlreadyStartedAndUserTryToMakeReservation(){
-        String login = "login";
-        String email = "email";
-        long lectureId = 1L;
-
-        Lecture lecture = new Lecture();
-        lecture.setStartDateTime(LocalDateTime.now());
-
-        when(lectureThematicPathService.findById(lectureId)).thenReturn(Optional.of(lecture));
-        when(timeService.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(true);
-
-        assertThrows(LectureReservationExpiredException.class, () -> reservationService.reserve(login, email, lectureId));
-    }
-
-    @Test
     void shouldThrowExceptionWhenLectureNotFound(){
         String login = "login";
         String email = "email";
@@ -102,6 +88,22 @@ public class ReservationServiceTest {
         assertThrows(LectureNotFound.class, () -> reservationService.reserve(login, email, lectureId));
     }
 
+
+    @Test
+    void shouldThrowExceptionWhenLectureHasAlreadyStartedAndUserTryToMakeReservation(){
+        String login = "login";
+        String email = "email";
+        long lectureId = 1L;
+
+        Lecture lecture = new Lecture();
+        lecture.setStartDateTime(LocalDateTime.now());
+
+        when(lectureThematicPathService.findById(lectureId)).thenReturn(Optional.of(lecture));
+        when(timeServiceImpl.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(true);
+
+        assertThrows(LectureReservationExpiredException.class, () -> reservationService.reserve(login, email, lectureId));
+    }
+
     @Test
     void shouldThrowExceptionWhenLimitOfLectureReached(){
 
@@ -109,19 +111,25 @@ public class ReservationServiceTest {
             String email = "email";
             long lectureId = 1L;
 
+            User user = new User();
+            user.setLogin(login);
+            user.setEmail(email);
+
             Lecture lecture = new Lecture();
             lecture.setStartDateTime(LocalDateTime.now());
 
+            when(userService.findByLogin(login)).thenReturn(Optional.of(user));
+            when(reservationRepository.findAllByUser(user)).thenReturn(new ArrayList<>());
             when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit);
             when(lectureThematicPathService.findById(lectureId)).thenReturn(Optional.of(lecture));
-            when(timeService.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(false);
+            when(timeServiceImpl.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(false);
 
             assertThrows(LimitOfReservations.class, () -> reservationService.reserve(login, email, lectureId));
 
     }
 
     @Test
-    void shouldThrowExceptionWhenUserAlreadyReserveLecture(){
+    void shouldThrowExceptionWhenUserAlreadyReserveLectureOnThisTime(){
         //given
         String login = "login";
         String email = "email";
@@ -131,13 +139,19 @@ public class ReservationServiceTest {
         user.setEmail(email);
         user.setLogin(login);
 
+        LocalDateTime startTime = LocalDateTime.now();
         Lecture lecture = new Lecture();
-        lecture.setStartDateTime(LocalDateTime.now());
+        lecture.setStartDateTime(startTime);
+        lecture.setId(lectureId);
 
-        when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit - 1);
-        when(reservationRepository.findByLectureIdAndUserLogin(lectureId, login)).thenReturn(Optional.of(new Reservation()));
+        Reservation reservation = new Reservation();
+        reservation.setLecture(lecture);
+        reservation.setLectureId(lectureId);
+
+        when(userService.findByLogin(login)).thenReturn(Optional.of(user));
+        when(reservationRepository.findAllByUser(user)).thenReturn(List.of(reservation));
         when(lectureThematicPathService.findById(lectureId)).thenReturn(Optional.of(lecture));
-        when(timeService.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(false);
+        when(timeServiceImpl.isExpired(ArgumentMatchers.any(LocalDateTime.class))).thenReturn(false);
 
         //when
         assertThrows(DuplicateReservationException.class, () -> reservationService.reserve(login, email, lectureId));
@@ -160,8 +174,9 @@ public class ReservationServiceTest {
         thematicPath.setId(1L);
         lecture.setThematicPath(thematicPath);
 
+        when(userService.findByLogin(login)).thenReturn(Optional.of(user));
+        when(reservationRepository.findAllByUser(user)).thenReturn(new ArrayList<>());
         when(reservationRepository.countAllByLectureId(lectureId)).thenReturn(reservationLimit - 1);
-        when(reservationRepository.findByLectureIdAndUserLogin(lectureId, login)).thenReturn(Optional.empty());
         when(userService.findByLogin(login)).thenReturn(Optional.of(user));
         when(lectureThematicPathService.findById(lectureId)).thenReturn(Optional.of(lecture));
 

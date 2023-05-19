@@ -27,17 +27,17 @@ public class ReservationServiceImpl implements ReservationService {
     private final UserService userService;
     private final LectureThematicPathService lectureThematicPathService;
     private final MailService mailService;
-    private final TimeService timeService;
+    private final TimeServiceImpl timeServiceImpl;
     private final long lectureLimit;
 
     @Autowired
-    public ReservationServiceImpl(@Value("${conference.lecture.limit}") int limit, TimeService timeService, ReservationRepository reservationRepository, UserService userService, LectureThematicPathService lectureThematicPathService, MailService mailService) {
+    public ReservationServiceImpl(@Value("${conference.lecture.limit}") int limit, TimeServiceImpl timeServiceImpl, ReservationRepository reservationRepository, UserService userService, LectureThematicPathService lectureThematicPathService, MailService mailService) {
         this.lectureLimit = limit;
         this.reservationRepository = reservationRepository;
         this.userService = userService;
         this.lectureThematicPathService = lectureThematicPathService;
         this.mailService = mailService;
-        this.timeService = timeService;
+        this.timeServiceImpl = timeServiceImpl;
     }
 
     @Override
@@ -62,31 +62,34 @@ public class ReservationServiceImpl implements ReservationService {
         Lecture lecture = lectureThematicPathService.findById(lectureId).orElseThrow(() -> new LectureNotFound("Lecture with id [" + lectureId +"] not found"));
         LocalDateTime lectureStartDateTime = lecture.getStartDateTime();
 
-        if(timeService.isExpired(lectureStartDateTime))
+        if(timeServiceImpl.isExpired(lectureStartDateTime))
             throw new LectureReservationExpiredException("Lecture has already started. You cannot make reservation");
+
+        User user = userService.findByLogin(login).orElseThrow(() -> new UserNotFound("User [" + login + "] not found"));
+        List<Reservation> listOfUsersReservations = reservationRepository.findAllByUser(user);
+        for(Reservation r: listOfUsersReservations){
+            Lecture lectureReserved =  lectureThematicPathService.findById(r.getLectureId()).orElseThrow(() -> new LectureNotFound("Lecture with id [" + lectureId +"] not found"));
+            if(lecture.getStartDateTime().isEqual(lectureReserved.getStartDateTime()))
+                throw new DuplicateReservationException("User try to make reservation to the same time [" + lectureReserved.getStartDateTime() +"]");
+        }
 
         if(reservationRepository.countAllByLectureId(lectureId) == this.lectureLimit)
             throw new LimitOfReservations("Limit of reservation of lecture with id [" + lectureId + "] reached");
 
 
-        if(reservationRepository.findByLectureIdAndUserLogin(lectureId, login).isEmpty()){
+        Reservation reservation = new Reservation();
+        reservation.setLectureId(lectureId);
+        reservation.setUser(userService.findByLogin(login).orElseThrow(() -> new UserNotFound("User [" + login +"] not found")));
 
-                Reservation reservation = new Reservation();
-                reservation.setLectureId(lectureId);
-                reservation.setUser(userService.findByLogin(login).orElseThrow(() -> new UserNotFound("User [" + login +"] not found")));
+        reservation.setLecture(lecture);
+        reservation.setThematicPathId(lecture.getThematicPath().getId());
 
-                reservation.setLecture(lecture);
-                reservation.setThematicPathId(lecture.getThematicPath().getId());
+        mailService.sendEmail(email, login, lecture);
 
-                mailService.sendEmail(email, login, lecture);
+        reservationRepository.save(reservation);
+        log.info("Reservation to "  + lectureThematicPathService.findById(lectureId) + " of user " + login + " was saved");
 
-                reservationRepository.save(reservation);
-                log.info("Reservation to "  + lectureThematicPathService.findById(lectureId) + " of user " + login + " was saved");
-
-                return reservation;
-     }
-        log.info("User [" + login + "] tries make reservation for the lecture twice");
-        throw new DuplicateReservationException("User have already made a reservation for this lecture");
+        return reservation;
     }
 
     @Override
@@ -104,16 +107,19 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int numberOfReservationsOfLecture(long lectureId) {
         return reservationRepository.countAllByLectureId(lectureId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public int numberOfReservationsOfThematicPath(long thematicPathId) {
         return reservationRepository.countAllByThematicPathId(thematicPathId);
     }

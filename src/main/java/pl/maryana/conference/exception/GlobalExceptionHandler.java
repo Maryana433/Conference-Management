@@ -58,7 +58,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(UserNotFound.class)
-    public ResponseEntity<ApiExceptionDto> reservationNotFound(UserNotFound e) {
+    public ResponseEntity<ApiExceptionDto> userNotFound(UserNotFound e) {
         log.debug("NOT_FOUND - " + e.getMessage());
         return buildResponseEntity(e, HttpStatus.NOT_FOUND);
     }
@@ -71,8 +71,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DuplicateReservationException.class)
     public ResponseEntity<ApiExceptionDto> duplicateReservation(DuplicateReservationException e) {
-        log.debug("FORBIDDEN - " + e.getMessage());
-        return buildResponseEntity(e, HttpStatus.FORBIDDEN);
+        log.debug("BAD_REQUEST - " + e.getMessage());
+        return buildResponseEntity(e, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(LectureReservationExpiredException.class)
@@ -86,7 +86,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         log.debug("INTERNAL_SERVER_ERROR - " + e.getMessage());
         return buildResponseEntity(e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 
 
     private static ResponseEntity<ApiExceptionDto> buildResponseEntity(Exception e, HttpStatus status) {

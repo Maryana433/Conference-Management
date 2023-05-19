@@ -64,6 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<User> findAllRegisteredUsers(long lecture_id) {
          if(lecture_id == 0){
              return userRepository.findByMakeReservation();

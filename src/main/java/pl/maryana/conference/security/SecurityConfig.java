@@ -19,6 +19,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
+    private static final String[] AUTH_WHITELIST = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/h2-console/**"
+    };
+
     private final UserDetailServiceImpl userDetailsService;
     private final AuthTokenFilter jwtRequestFilter;
 
@@ -44,12 +50,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
-
-    private static final String[] AUTH_WHITELIST = {
-            "/swagger-ui/**",
-            "/v3/api-docs/**",
-            "/h2-console/**"
-    };
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

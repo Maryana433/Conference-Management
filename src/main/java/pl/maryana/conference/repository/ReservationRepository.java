@@ -15,15 +15,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     int countAllByLectureId(long lectureId);
 
+
     List<Reservation> findAllByUser(User user);
 
     @Query("select r from Reservation r where r.id = :reservationId and r.user.login = :login")
     Optional<Reservation> findByIdAndUserLogin(@Param("reservationId") long reservationId,
                                                @Param("login") String login);
-
-    @Query("select r from Reservation r where r.lectureId = :lectureId and r.user.login = :login")
-    Optional<Reservation> findByLectureIdAndUserLogin(@Param("lectureId") long lectureID,
-                                                      @Param("login") String login);
 
     int countAllByThematicPathId(long thematicPathId);
 }

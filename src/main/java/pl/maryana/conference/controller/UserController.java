@@ -35,7 +35,7 @@ public class UserController {
     @PatchMapping("/email")
     @Operation(summary="Update email", description = "Użytkownik może zaktualizować swój adres e-mail.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Reservation deleted", content = @Content(schema
+            @ApiResponse(responseCode = "200", description = "Email updated", content = @Content(schema
                     = @Schema(implementation = UserInfoDto.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema =
                     @Schema(implementation = ApiExceptionDto.class)))

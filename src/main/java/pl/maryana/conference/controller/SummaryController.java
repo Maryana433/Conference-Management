@@ -65,7 +65,7 @@ public class SummaryController {
 
     @GetMapping("/paths/file")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary="User with role ADMIN can get all user", description = "Wygenerowanie zestawienia dla organizatora:\n" +
+    @Operation(summary="User with role ADMIN can generate statistics", description = "Wygenerowanie zestawienia dla organizatora:\n" +
             "zestawienie ścieżek tematycznych wg zainteresowania (procentowy udział)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "participation statistics for each thematic path", content = @Content(schema

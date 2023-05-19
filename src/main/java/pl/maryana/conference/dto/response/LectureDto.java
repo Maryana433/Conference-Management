@@ -1,24 +1,23 @@
 package pl.maryana.conference.dto.response;
 
-import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maryana.conference.model.Lecture;
 
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class LectureDto {
 
     private long id;
     private String thematicPath;
     private String description;
-    private String startTime;
-    private String endTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy H:mm")
+    private LocalDateTime startTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy H:mm")
+    private LocalDateTime endTime;
 
     public LectureDto(Lecture lecture){
 
@@ -27,8 +26,7 @@ public class LectureDto {
         this.id = lecture.getId();
         this.thematicPath = lecture.getThematicPath().getName();
         this.description = lecture.getDescription();
-        this.startTime = lecture.getStartDateTime().format(DateTimeFormatter.ofPattern(dateTimePattern));
-        this.endTime = lecture.getStartDateTime().plusMinutes(lecture.getMinutDuration()).
-                format(DateTimeFormatter.ofPattern(dateTimePattern));
+        this.startTime = lecture.getStartDateTime();
+        this.endTime = lecture.getEndDateTime();
     }
 }

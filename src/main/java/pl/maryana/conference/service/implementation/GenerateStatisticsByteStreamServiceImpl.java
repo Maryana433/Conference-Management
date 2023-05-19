@@ -21,13 +21,13 @@ public class GenerateStatisticsByteStreamServiceImpl implements GenerateStatisti
 
     private final ReservationService reservationService;
     private final int lectureLimit;
-    private final int numberOfPathsPerLecture;
+    private final int numberOfLecturesOfPath;
 
     public GenerateStatisticsByteStreamServiceImpl(ReservationService reservationService, @Value("${conference.lecture.limit}") int limit,
-                                                   @Value("${conference.thematic-path.number}") int numberOfPathsPerLecture) {
+                                                   @Value("${conference.lecture.number}") int numberOfLecturesOfPath) {
         this.reservationService = reservationService;
         this.lectureLimit = limit;
-        this.numberOfPathsPerLecture = numberOfPathsPerLecture;
+        this.numberOfLecturesOfPath = numberOfLecturesOfPath;
     }
 
 
@@ -42,7 +42,8 @@ public class GenerateStatisticsByteStreamServiceImpl implements GenerateStatisti
                 stream.write(System.lineSeparator().getBytes());
                 stream.write(("Start time : " + l.getStartDateTime().toString()).getBytes());
                 stream.write(System.lineSeparator().getBytes());
-                stream.write(((Math.round(reservationService.numberOfReservationsOfLecture(l.getId())) / (lectureLimit * 1.0)*100.0 + "%").getBytes()));
+                double participationLecture = reservationService.numberOfReservationsOfLecture(l.getId())/(lectureLimit* 1.0f) * 100.0;
+                stream.write((Math.round(participationLecture *100)/100.00+ "%").getBytes());
                 stream.write(System.lineSeparator().getBytes());
                 stream.write("------------------".getBytes());
                 stream.write(System.lineSeparator().getBytes());
@@ -63,8 +64,8 @@ public class GenerateStatisticsByteStreamServiceImpl implements GenerateStatisti
 
                 stream.write(("Thematic Path : " + path.getName()).getBytes());
                 stream.write(System.lineSeparator().getBytes());
-                stream.write((Math.round(reservationService.numberOfReservationsOfThematicPath(path.getId())/(lectureLimit*numberOfPathsPerLecture*1.0))
-                        * 100.0 + "%").getBytes());
+                double participationPerPath = reservationService.numberOfReservationsOfThematicPath(path.getId())/(lectureLimit * numberOfLecturesOfPath * 1.0f) * 100.0;
+                stream.write((Math.round(participationPerPath * 100)/100.00 +  "%").getBytes());
                 stream.write(System.lineSeparator().getBytes());
                 stream.write("------------------".getBytes());
                 stream.write(System.lineSeparator().getBytes());

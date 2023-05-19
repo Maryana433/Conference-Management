@@ -1,13 +1,12 @@
 package pl.maryana.conference.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.model.Reservation;
-import pl.maryana.conference.model.User;
 
-import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -16,22 +15,22 @@ public class ReservationDto {
     private long reservationId;
     private long lectureId;
     private String thematicPath;
-    private String startTime;
-    private String endTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy H:mm:ss")
+    private LocalDateTime startTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy H:mm:ss")
+    private LocalDateTime endTime;
+    private String description;
 
     public ReservationDto(Reservation reservation){
 
-        String dateTimePattern = "dd-MM-yyyy H:mm";
-
-        User user = reservation.getUser();
         Lecture lecture = reservation.getLecture();
 
         this.reservationId = reservation.getId();
         this.lectureId = lecture.getId();
         this.thematicPath = lecture.getThematicPath().getName();
-        this.startTime = lecture.getStartDateTime().format(DateTimeFormatter.ofPattern(dateTimePattern));
-        this.endTime = lecture.getStartDateTime().plusMinutes(lecture.getMinutDuration()).
-                format(DateTimeFormatter.ofPattern(dateTimePattern));
+        this.startTime = lecture.getStartDateTime();
+        this.endTime = lecture.getEndDateTime();
+        this.description = lecture.getDescription();
     }
 
 

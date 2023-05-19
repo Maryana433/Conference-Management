@@ -13,6 +13,7 @@ CREATE TABLE conference_user (
 CREATE TABLE reservation (
     id IDENTITY PRIMARY KEY,
     lecture_id bigint,
+    thematic_path_id bigint,
     user_id bigint
 );
 

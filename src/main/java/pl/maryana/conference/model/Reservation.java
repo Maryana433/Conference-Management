@@ -22,6 +22,9 @@ public class Reservation {
     @Column(name = "lecture_id")
     private long lectureId;
 
+    @Column(name = "thematic_path_id")
+    private long thematicPathId;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

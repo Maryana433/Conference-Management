@@ -81,6 +81,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(e, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(OutputStreamException.class)
+    public ResponseEntity<ApiExceptionDto> lectureReservation(OutputStreamException e) {
+        log.debug("INTERNAL_SERVER_ERROR - " + e.getMessage());
+        return buildResponseEntity(e, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
 
 
     private static ResponseEntity<ApiExceptionDto> buildResponseEntity(Exception e, HttpStatus status) {

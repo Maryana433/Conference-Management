@@ -3,29 +3,27 @@ package pl.maryana.conference.repository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import pl.maryana.conference.model.Lecture;
+import pl.maryana.conference.model.ThematicPath;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
-public class LectureRepository {
+public class LectureThematicPathRepository {
 
-    private final List<Lecture> lectures;
+    private List<Lecture> lectures = new ArrayList<>();
+    private Set<ThematicPath> thematicPathSet = new HashSet<>();
 
     private final int lectureNumber;
 
     private final int thematicPathNumber;
 
-    public LectureRepository(@Value("${conference.lecture.number}") int lectureNumber, @Value("${conference.lecture.number}") int thematicPathNumber ){
+    public LectureThematicPathRepository(@Value("${conference.lecture.number}") int lectureNumber, @Value("${conference.lecture.number}") int thematicPathNumber ){
 
         this.thematicPathNumber = thematicPathNumber;
         this.lectureNumber = lectureNumber;
-
-        this.lectures = new ArrayList<>();
 
         for(int i = 1; i<= lectureNumber; i++){
             this.lectures.addAll(generateAllLecturesByOrderAndNumberOfPaths(i, thematicPathNumber));
@@ -38,6 +36,10 @@ public class LectureRepository {
 
     public Optional<Lecture> findById(long id){
         return this.lectures.stream().filter(l -> l.getId() == id).findFirst();
+    }
+
+    public Set<ThematicPath> findAllThematicPaths(){
+        return this.thematicPathSet;
     }
 
     private List<Lecture> generateAllLecturesByOrderAndNumberOfPaths(int lectureOrder, int numberOfPaths){
@@ -56,7 +58,10 @@ public class LectureRepository {
             LocalDateTime startTime = LocalDateTime.of(dateOfConference, startTimeOfConference.plusMinutes((long) (lectureOrder - 1) * (durationOfEachLecture + breakBetweenLectures)));
             long lectureId = (lectureOrder-1)* 3L + i;
 
-            lectureList.add(new Lecture(lectureId, lectureOrder, String.format("Thematic Path %d", i),
+            ThematicPath thematicPath = new ThematicPath(i,String.format("Thematic Path %d", i));
+            thematicPathSet.add(thematicPath);
+
+            lectureList.add(new Lecture(lectureId, lectureOrder, thematicPath,
                     String.format("Description of the lecture %d of thematic path %d",lectureOrder, i), startTime, durationOfEachLecture));
         }
 

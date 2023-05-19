@@ -5,9 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.TestPropertySource;
 import pl.maryana.conference.model.Lecture;
-import pl.maryana.conference.repository.LectureRepository;
+import pl.maryana.conference.repository.LectureThematicPathRepository;
 import pl.maryana.conference.service.MailService;
 
 import java.io.File;
@@ -17,14 +16,14 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SpringBootTest(classes = {MailServiceImpl.class, LectureRepository.class})
+@SpringBootTest(classes = {MailServiceImpl.class, LectureThematicPathRepository.class})
 public class MailServiceTest {
 
     @Autowired
     private MailService mailService;
 
     @Autowired
-    private LectureRepository lectureRepository;
+    private LectureThematicPathRepository lectureThematicPathRepository;
 
     @Value("${email.message.file-name}")
     private String fileName;
@@ -35,12 +34,12 @@ public class MailServiceTest {
 
         // given
         long lectureId1 = 1L;
-        Lecture lecture1 = lectureRepository.findById(lectureId1).get();
+        Lecture lecture1 = lectureThematicPathRepository.findById(lectureId1).get();
         String sendTo1 = "maryanamartyniuk@gmail.com";
         String login1 = "login";
 
         long lectureId2 = 2L;
-        Lecture lecture2 = lectureRepository.findById(lectureId2).get();
+        Lecture lecture2 = lectureThematicPathRepository.findById(lectureId2).get();
         String sendTo2 = "maryanamartyniuk2@gmail.com";
         String login2 = "login2";
 

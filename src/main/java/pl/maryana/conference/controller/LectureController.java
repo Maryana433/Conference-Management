@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pl.maryana.conference.dto.response.LectureDto;
-import pl.maryana.conference.service.LectureService;
+import pl.maryana.conference.service.LectureThematicPathService;
 import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/lectures")
 public class LectureController {
 
-    private final LectureService lectureService;
+    private final LectureThematicPathService lectureThematicPathService;
 
     @Autowired
-    public LectureController(LectureService lectureService) {
-        this.lectureService = lectureService;
+    public LectureController(LectureThematicPathService lectureThematicPathService) {
+        this.lectureThematicPathService = lectureThematicPathService;
     }
 
     @GetMapping
@@ -35,7 +35,7 @@ public class LectureController {
                                                 @ArraySchema(schema = @Schema(implementation = LectureDto.class))))
     })
     public Map<String, List<LectureDto>> getAllLectures(){
-        return lectureService.findAll().stream().map(LectureDto::new).collect(Collectors.groupingBy(LectureDto::getStartTime));
+        return lectureThematicPathService.findAll().stream().map(LectureDto::new).collect(Collectors.groupingBy(LectureDto::getStartTime));
     }
 
 }

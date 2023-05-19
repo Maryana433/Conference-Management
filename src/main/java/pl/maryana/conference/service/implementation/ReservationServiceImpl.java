@@ -2,6 +2,7 @@ package pl.maryana.conference.service.implementation;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pl.maryana.conference.exception.*;
@@ -9,7 +10,7 @@ import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.model.Reservation;
 import pl.maryana.conference.model.User;
 import pl.maryana.conference.repository.ReservationRepository;
-import pl.maryana.conference.service.LectureService;
+import pl.maryana.conference.service.LectureThematicPathService;
 import pl.maryana.conference.service.MailService;
 import pl.maryana.conference.service.ReservationService;
 import pl.maryana.conference.service.UserService;
@@ -24,15 +25,17 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final UserService userService;
-    private final LectureService lectureService;
+    private final LectureThematicPathService lectureThematicPathService;
     private final MailService mailService;
     private final TimeService timeService;
+    private final long lectureLimit;
 
     @Autowired
-    public ReservationServiceImpl(TimeService timeService, ReservationRepository reservationRepository, UserService userService, LectureService lectureService, MailService mailService) {
+    public ReservationServiceImpl(@Value("${conference.lecture.limit}") int limit, TimeService timeService, ReservationRepository reservationRepository, UserService userService, LectureThematicPathService lectureThematicPathService, MailService mailService) {
+        this.lectureLimit = limit;
         this.reservationRepository = reservationRepository;
         this.userService = userService;
-        this.lectureService = lectureService;
+        this.lectureThematicPathService = lectureThematicPathService;
         this.mailService = mailService;
         this.timeService = timeService;
     }
@@ -48,7 +51,7 @@ public class ReservationServiceImpl implements ReservationService {
         }
 
         List<Reservation> reservations = reservationRepository.findAllByUser(user.get());
-        reservations.forEach(r -> r.setLecture(lectureService.findById(r.getLectureId()).
+        reservations.forEach(r -> r.setLecture(lectureThematicPathService.findById(r.getLectureId()).
                 orElseThrow(() -> new LectureNotFound("Lecture with id [" + r.getLectureId() +"] not found"))));
         return reservations;
     }
@@ -56,13 +59,13 @@ public class ReservationServiceImpl implements ReservationService {
     @Override
     public Reservation reserve(String login, String email, long lectureId) {
 
-        Lecture lecture = lectureService.findById(lectureId).orElseThrow(() -> new LectureNotFound("Lecture with id [" + lectureId +"] not found"));
+        Lecture lecture = lectureThematicPathService.findById(lectureId).orElseThrow(() -> new LectureNotFound("Lecture with id [" + lectureId +"] not found"));
         LocalDateTime lectureStartDateTime = lecture.getStartDateTime();
 
         if(timeService.isExpired(lectureStartDateTime))
             throw new LectureReservationExpiredException("Lecture has already started. You cannot make reservation");
 
-        if(reservationRepository.countAllByLectureId(lectureId) == 5)
+        if(reservationRepository.countAllByLectureId(lectureId) == this.lectureLimit)
             throw new LimitOfReservations("Limit of reservation of lecture with id [" + lectureId + "] reached");
 
 
@@ -73,11 +76,12 @@ public class ReservationServiceImpl implements ReservationService {
                 reservation.setUser(userService.findByLogin(login).orElseThrow(() -> new UserNotFound("User [" + login +"] not found")));
 
                 reservation.setLecture(lecture);
+                reservation.setThematicPathId(lecture.getThematicPath().getId());
 
                 mailService.sendEmail(email, login, lecture);
 
                 reservationRepository.save(reservation);
-                log.info("Reservation to "  + lectureService.findById(lectureId) + " of user " + login + " was saved");
+                log.info("Reservation to "  + lectureThematicPathService.findById(lectureId) + " of user " + login + " was saved");
 
                 return reservation;
      }
@@ -98,5 +102,21 @@ public class ReservationServiceImpl implements ReservationService {
 
         reservationRepository.delete(reservation);
     }
+
+    @Override
+    public List<Reservation> findAll() {
+        return reservationRepository.findAll();
+    }
+
+    @Override
+    public int numberOfReservationsOfLecture(long lectureId) {
+        return reservationRepository.countAllByLectureId(lectureId);
+    }
+
+    @Override
+    public int numberOfReservationsOfThematicPath(long thematicPathId) {
+        return reservationRepository.countAllByThematicPathId(thematicPathId);
+    }
+
 
 }

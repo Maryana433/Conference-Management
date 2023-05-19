@@ -13,9 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    long countAllByLectureId(long lectureId);
-
-    Optional<Reservation> findByUserAndLectureId(User user, long lectureId);
+    int countAllByLectureId(long lectureId);
 
     List<Reservation> findAllByUser(User user);
 
@@ -26,4 +24,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("select r from Reservation r where r.lectureId = :lectureId and r.user.login = :login")
     Optional<Reservation> findByLectureIdAndUserLogin(@Param("lectureId") long lectureID,
                                                       @Param("login") String login);
+
+    int countAllByThematicPathId(long thematicPathId);
 }

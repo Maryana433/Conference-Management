@@ -7,11 +7,10 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.maryana.conference.exception.LectureNotFound;
 import pl.maryana.conference.exception.LoginIsAlreadyTaken;
 import pl.maryana.conference.exception.UserNotFound;
-import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.model.Role;
 import pl.maryana.conference.model.User;
 import pl.maryana.conference.repository.UserRepository;
-import pl.maryana.conference.service.LectureService;
+import pl.maryana.conference.service.LectureThematicPathService;
 import pl.maryana.conference.service.UserService;
 
 import java.util.List;
@@ -22,12 +21,12 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final LectureService lectureService;
+    private final LectureThematicPathService lectureThematicPathService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, LectureService lectureService) {
+    public UserServiceImpl(UserRepository userRepository, LectureThematicPathService lectureThematicPathService) {
         this.userRepository = userRepository;
-        this.lectureService = lectureService;
+        this.lectureThematicPathService = lectureThematicPathService;
     }
 
 
@@ -70,7 +69,7 @@ public class UserServiceImpl implements UserService {
              return userRepository.findByMakeReservation();
          }
 
-         lectureService.findById(lecture_id).orElseThrow(() -> new LectureNotFound("Lecture with id [" + lecture_id + "] not found"));
+         lectureThematicPathService.findById(lecture_id).orElseThrow(() -> new LectureNotFound("Lecture with id [" + lecture_id + "] not found"));
 
          return userRepository.findByMakeReservation(lecture_id);
     }

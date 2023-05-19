@@ -25,7 +25,7 @@ public class LectureDto {
         String dateTimePattern = "dd-MM-yyyy H:mm";
 
         this.id = lecture.getId();
-        this.thematicPath = lecture.getThematicPath();
+        this.thematicPath = lecture.getThematicPath().getName();
         this.description = lecture.getDescription();
         this.startTime = lecture.getStartDateTime().format(DateTimeFormatter.ofPattern(dateTimePattern));
         this.endTime = lecture.getStartDateTime().plusMinutes(lecture.getMinutDuration()).

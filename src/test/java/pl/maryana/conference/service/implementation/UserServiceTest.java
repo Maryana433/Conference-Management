@@ -12,7 +12,7 @@ import pl.maryana.conference.exception.LoginIsAlreadyTaken;
 import pl.maryana.conference.model.Lecture;
 import pl.maryana.conference.model.User;
 import pl.maryana.conference.repository.UserRepository;
-import pl.maryana.conference.service.LectureService;
+import pl.maryana.conference.service.LectureThematicPathService;
 import pl.maryana.conference.service.UserService;
 
 import java.util.Optional;
@@ -28,12 +28,12 @@ public class UserServiceTest {
     @Mock
     private UserRepository userRepository;
     @Mock
-    private LectureService lectureService;
+    private LectureThematicPathService lectureThematicPathService;
     private UserService userService;
 
     @BeforeEach
     void init(){
-        userService = new UserServiceImpl(userRepository, lectureService);
+        userService = new UserServiceImpl(userRepository, lectureThematicPathService);
     }
 
 
@@ -113,7 +113,7 @@ public class UserServiceTest {
     @Test
     void shouldReturnRegisteredUsersByLecture(){
         long lectureId = 1L;
-        when(lectureService.findById(lectureId)).thenReturn(Optional.of(new Lecture()));
+        when(lectureThematicPathService.findById(lectureId)).thenReturn(Optional.of(new Lecture()));
 
         userService.findAllRegisteredUsers(lectureId);
 
@@ -124,7 +124,7 @@ public class UserServiceTest {
     @Test
     void shouldThrowExceptionWhenLectureNotFound(){
         long lectureId = 1L;
-        when(lectureService.findById(lectureId)).thenReturn(Optional.empty());
+        when(lectureThematicPathService.findById(lectureId)).thenReturn(Optional.empty());
 
         assertThrows(LectureNotFound.class, () -> userService.findAllRegisteredUsers(lectureId));
 

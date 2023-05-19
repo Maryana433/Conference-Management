@@ -13,13 +13,13 @@ public class Lecture {
 
     private long id;
     private int order;
-    private String thematicPath;
+    private ThematicPath thematicPath;
     private String description;
 
     private LocalDateTime startDateTime;
     private int minutDuration;
 
-    public Lecture(long id, int order, String thematicPath, String description, LocalDateTime startDateTime, int minutDuration ) {
+    public Lecture(long id, int order, ThematicPath thematicPath, String description, LocalDateTime startDateTime, int minutDuration ) {
         this.id = id;
         this.order = order;
         this.thematicPath = thematicPath;

@@ -28,7 +28,7 @@ public class ReservationDto {
 
         this.reservationId = reservation.getId();
         this.lectureId = lecture.getId();
-        this.thematicPath = lecture.getThematicPath();
+        this.thematicPath = lecture.getThematicPath().getName();
         this.startTime = lecture.getStartDateTime().format(DateTimeFormatter.ofPattern(dateTimePattern));
         this.endTime = lecture.getStartDateTime().plusMinutes(lecture.getMinutDuration()).
                 format(DateTimeFormatter.ofPattern(dateTimePattern));
